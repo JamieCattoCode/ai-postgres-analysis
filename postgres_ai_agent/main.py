@@ -2,6 +2,14 @@ from postgres_ai_agent.modules.db import PostgresDB
 from postgres_ai_agent.modules import llm
 import os
 import dotenv
+from autogen import (
+    AssistantAgent,
+    UserProxyAgent,
+    GroupChat,
+    GroupChatManager,
+    config_list_from_json,
+    config_list_from_models,
+)
 
 dotenv.load_dotenv()
 
@@ -45,38 +53,20 @@ def main():
             table_definitions
         )
 
-        print('Prompt v2: ', prompt)
+        # build the gpt_configuration object
 
-        prompt = llm.add_cap_ref(
-            prompt, 
-            f"\nYou must respond in the format {TABLE_RESPONSE_FORMAT_CAP_REF}. You must simply put your answers instead of the <>. Do not write anything extra. Do not add headings, colons, or apply your own formatting.", 
-            TABLE_RESPONSE_FORMAT_CAP_REF, 
-            f"""<explanation of the SQL query goes here>
-{SQL_DELIMITER}
-<SQL query exclusively as raw text goes here>
-            """
-        )
+        # build the function map
 
-        # call llm.prompt to get a prompt_response variable
-        prompt_response = llm.prompt(prompt)
+        # create our terminate msg function
 
-        print('Prompt response: ', prompt_response)
+        # create a set of agents
+            # admin user proxy agent - takes in the prompt and manages the group chat
+            # data engineer agent - generates the SQL query
+            # senior data analyst agent - run the SQL query and generate the response
+            # product manager - validate the response to make sure it's correct
 
-        # parse SQL response from prompt_response using SQL_QUERY_DELIMITER '---------'
+        # create a group chat and initiate the chat
 
-
-        # call db_manager.run_sql() with the parsed sql
-        try:
-            sql_statement = prompt_response.split(SQL_DELIMITER)[1].strip()
-            result = db.run_sql(sql_statement)
-        except:
-            prompt_response = llm.prompt(prompt)
-            print('Regenerated prompt response: ', prompt_response)
-
-            sql_statement = prompt_response.split(SQL_DELIMITER)[1].strip()
-            result = db.run_sql(sql_statement)
-
-        print('Result: ', result)
 
 if __name__ == '__main__':
     main()
