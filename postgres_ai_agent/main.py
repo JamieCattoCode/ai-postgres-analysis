@@ -60,10 +60,26 @@ def main():
         # create our terminate msg function
 
         # create a set of agents
-            # admin user proxy agent - takes in the prompt and manages the group chat
-            # data engineer agent - generates the SQL query
-            # senior data analyst agent - run the SQL query and generate the response
-            # product manager - validate the response to make sure it's correct
+        admin = UserProxyAgent(
+            name="Admin",
+            system_message="Admin. Takes in the prompt and manages the group chat.",
+            code_execution_config=False,
+        )
+        engineer = AssistantAgent(
+            name="Data Engineer",
+            llm_config=gpt4_config,
+            system_message="Data Engineer. Generates the SQL query.",
+        )
+        analyst = AssistantAgent(
+            name="Senior Data Analyst",
+            llm_config=gpt4_config,
+            system_message="Senior Data Analyst. Runs the SQL query and generates the response.",
+        )
+        manager = AssistantAgent(
+            name="Product Manager",
+            llm_config=gpt4_config,
+            system_message="Product Manager. Validates the response to make sure it's correct.",
+        )
 
         # create a group chat and initiate the chat
 
