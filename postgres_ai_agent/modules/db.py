@@ -50,16 +50,48 @@ class PostgresDB:
 
     def run_sql(self, sql_statement):
         self.cur.execute(sql_statement)
-        self.conn.commit()
+        # Determine if the SQL statement is a SELECT statement
+        if self.cur.description:
+            # If it is a SELECT statement, fetch the results
+            return self.cur.fetchall()
+        else:
+            # If it's not a SELECT statement, it's an action, commit it if autocommit is disabled
+            self.conn.commit()
+            return self.cur.rowcount 
 
     def get_table_definitions(self, table_name):
-        get_def_sql = """
-        SELECT pg_tables.tablename, pg_catalog.pg_get_tabledef(pg_tables.oid, true)
-        FROM pg_tables
-        WHERE tablename = %s;
+        # Query to retrieve the column definitions
+        column_def_sql = """
+            SELECT column_name, data_type, is_nullable, column_default
+            FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = %s
+            ORDER BY ordinal_position;
         """
-        self.cur.execute(get_def_sql, (table_name,))
-        return self.cur.fetchone()[1]
+
+        self.cur.execute(column_def_sql, (table_name,))
+        columns = self.cur.fetchall()
+
+        # Start the CREATE TABLE command
+        create_table_sql = f"CREATE TABLE {table_name} (\n"
+
+        # List of column definitions
+        column_definitions = []
+
+        for column in columns:
+            column_name, data_type, is_nullable, column_default = column
+            column_def = f"    {column_name} {data_type}"
+            if column_default is not None:
+                column_def += f" DEFAULT {column_default}"
+            if is_nullable == "NO":
+                column_def += " NOT NULL"
+            column_definitions.append(column_def)
+
+        # Combine column definitions and close the CREATE TABLE command
+        create_table_sql += ",\n".join(column_definitions)
+        create_table_sql += "\n);"
+
+        return create_table_sql
+
 
     def get_all_table_names(self):
         select_sql = "SELECT tablename FROM pg_tables WHERE schemaname='public';"
