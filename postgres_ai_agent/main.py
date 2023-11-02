@@ -53,8 +53,15 @@ def main():
             table_definitions
         )
 
-        # build the gpt_configuration object
+        config_list_gpt4 = ["gpt-4"]
 
+        # build the gpt_configuration object
+        gpt4_config = {
+            "seed": 42,
+            "temperature": 0,
+            "config_list": config_list_gpt4,
+            "seed": 120,
+        }
         # build the function map
 
         # create our terminate msg function
