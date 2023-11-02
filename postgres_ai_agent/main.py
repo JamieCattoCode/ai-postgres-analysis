@@ -69,13 +69,13 @@ def main():
         # create a set of agents
         admin = UserProxyAgent(
             name="Admin",
-            system_message="Admin. I manage the group chat and ensure that the human-language description of a database action is understood by all agents.",
+            system_message="Admin. Interact with the planner to discuss the plan. Plan execution needs to be approved by this admin.",
             code_execution_config=False,
         )
         engineer = AssistantAgent(
             name="Data Engineer",
             llm_config=gpt4_config,
-            system_message="Data Engineer. I generate the SQL query based on the human-language description of the database action.",
+            system_message="Data Engineer. You follow an approved plan. You write python/shell code to solve tasks.",
         )
         analyst = AssistantAgent(
             name="Senior Data Analyst",
@@ -89,6 +89,13 @@ def main():
         )
 
         # create a group chat and initiate the chat
+        groupchat = GroupChat(
+            agents=[admin, engineer],
+            messages=[],
+            max_round=50
+        )
+
+        manager = GroupChatManager(groupchat=groupchat, llm_config=gpt4_config)
 
 
 if __name__ == '__main__':
