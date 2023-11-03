@@ -48,8 +48,8 @@ class PostgresDB:
         self.cur.execute(select_sql)
         return self.cur.fetchall()
 
-    def run_sql(self, sql_statement):
-        self.cur.execute(sql_statement)
+    def run_sql(self, sql):
+        self.cur.execute(sql)
         # Determine if the SQL statement is a SELECT statement
         if self.cur.description:
             # If it is a SELECT statement, fetch the results
